@@ -1,0 +1,10 @@
+Input:images\face7.jpg
+Input full path:D:\Programming\osirv-project\images\face7.jpg
+Camera parameters:203.125,203.125,124,102
+Output csv:face7.csv
+Gaze: 0
+AUs: 0
+Landmarks 2D: 1
+Landmarks 3D: 0
+Pose: 0
+Shape parameters: 0
