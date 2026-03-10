@@ -52,22 +52,82 @@ def ShowLandmarks(image_path: Path, xs, ys):
     plt.axis("off")
     plt.show()
 
+def LoadPointsForTransform(csv_path: Path):
+    df = pd.read_csv(csv_path)
+    df.columns = df.columns.str.strip()
+
+    x_cols = [c for c in df.columns if c.startswith("x_")]
+    y_cols = [c for c in df.columns if c.startswith("y_")]
+
+    row = df.iloc[0]
+
+    pts = np.column_stack((row[x_cols].values, row[y_cols].values))
+    return pts.astype(np.float32)
+
+
+def ComputeAffine(A, B):
+    M, _ = cv2.estimateAffinePartial2D(B, A)
+    return M
+
+
+def WarpImage(img_src, img_dst, M):
+    h, w = img_dst.shape[:2]
+    warped = cv2.warpAffine(img_src, M, (w, h))
+    return warped
+
+def TransformPoints(points, M):
+    pts = points.reshape(-1, 1, 2)
+    pts_t = cv2.transform(pts, M)
+    return pts_t.reshape(-1, 2)
+
+def ShowAligned(imgA, imgB_aligned, ptsA, ptsB_transformed):
+
+    A = cv2.cvtColor(imgA, cv2.COLOR_BGR2RGB)
+    B = cv2.cvtColor(imgB_aligned, cv2.COLOR_BGR2RGB)
+
+    plt.figure(figsize=(10, 5))
+
+    plt.subplot(1, 2, 1)
+    plt.imshow(A)
+    plt.scatter(ptsA[:, 0], ptsA[:, 1], c="red", s=4)
+    plt.title("Image A")
+    plt.axis("off")
+
+    plt.subplot(1, 2, 2)
+    plt.imshow(B)
+    plt.scatter(ptsB_transformed[:, 0], ptsB_transformed[:, 1], c="red", s=4)
+    plt.title("Image B aligned")
+    plt.axis("off")
+
+    plt.show()
+
+
 
 def main():
-    images = sorted(IMAGES_DIR.glob("face*.jpg"))
 
-    if not images:
-        raise RuntimeError("No images found in images/")
+    imgA_path = Path("images/face3.jpg")
+    imgB_path = Path("images/face1.jpg")
 
-    for image_path in images:
-        print(f"Processing {image_path.name}")
+    RunOpenFace(imgA_path)
+    RunOpenFace(imgB_path)
+    
+    csvA = OUTPUT_DIR / "face3.csv"
+    csvB = OUTPUT_DIR / "face1.csv"
 
-        RunOpenFace(image_path)
+    ptsA = LoadPointsForTransform(csvA)
+    ptsB = LoadPointsForTransform(csvB)
 
-        csv_path = OUTPUT_DIR / (image_path.stem + ".csv")
+    imgA = cv2.imread(str(imgA_path))
+    imgB = cv2.imread(str(imgB_path))
 
-        xs, ys = LoadLandmarks(csv_path)
-        ShowLandmarks(image_path, xs, ys)
+    M = ComputeAffine(ptsA, ptsB)
+
+    alignedB = WarpImage(imgB, imgA, M)
+
+    ptsB_t = TransformPoints(ptsB, M)
+
+    ShowAligned(imgA, alignedB, ptsA, ptsB_t)
+
 
 if __name__ == "__main__":
     main()
