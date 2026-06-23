@@ -80,21 +80,29 @@ def TransformPoints(points, M):
     pts_t = cv2.transform(pts, M)
     return pts_t.reshape(-1, 2)
 
-def ShowAligned(imgA, imgB_aligned, ptsA, ptsB_transformed):
+def ShowAligned(imgA, imgB, imgB_aligned, ptsA, ptsB_transformed, ptsB):
 
     A = cv2.cvtColor(imgA, cv2.COLOR_BGR2RGB)
-    B = cv2.cvtColor(imgB_aligned, cv2.COLOR_BGR2RGB)
+    B = cv2.cvtColor(imgB, cv2.COLOR_BGR2RGB)
+    B_transformed = cv2.cvtColor(imgB_aligned, cv2.COLOR_BGR2RGB)
 
     plt.figure(figsize=(10, 5))
 
-    plt.subplot(1, 2, 1)
+    plt.subplot(1, 3, 1)
+    plt.imshow(B)
+    plt.scatter(ptsB[:, 0], ptsB[:, 1], c="red", s=4)
+    plt.title("Image B")
+    plt.axis("off")
+
+
+    plt.subplot(1, 3, 2)
     plt.imshow(A)
     plt.scatter(ptsA[:, 0], ptsA[:, 1], c="red", s=4)
     plt.title("Image A")
     plt.axis("off")
 
-    plt.subplot(1, 2, 2)
-    plt.imshow(B)
+    plt.subplot(1, 3, 3)
+    plt.imshow(B_transformed)
     plt.scatter(ptsB_transformed[:, 0], ptsB_transformed[:, 1], c="red", s=4)
     plt.title("Image B aligned")
     plt.axis("off")
@@ -105,14 +113,17 @@ def ShowAligned(imgA, imgB_aligned, ptsA, ptsB_transformed):
 
 def main():
 
-    imgA_path = Path("images/face3.jpg")
-    imgB_path = Path("images/face1.jpg")
+    imageA = "face5"
+    imageB = "face2"
+
+    imgA_path = Path(f"images/{imageA}.jpg")
+    imgB_path = Path(f"images/{imageB}.jpg")
 
     RunOpenFace(imgA_path)
     RunOpenFace(imgB_path)
     
-    csvA = OUTPUT_DIR / "face3.csv"
-    csvB = OUTPUT_DIR / "face1.csv"
+    csvA = OUTPUT_DIR / f"{imageA}.csv"
+    csvB = OUTPUT_DIR / f"{imageB}.csv"
 
     ptsA = LoadPointsForTransform(csvA)
     ptsB = LoadPointsForTransform(csvB)
@@ -126,7 +137,7 @@ def main():
 
     ptsB_t = TransformPoints(ptsB, M)
 
-    ShowAligned(imgA, alignedB, ptsA, ptsB_t)
+    ShowAligned(imgA, imgB, alignedB, ptsA, ptsB_t, ptsB)
 
 
 if __name__ == "__main__":
