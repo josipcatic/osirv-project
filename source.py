@@ -109,12 +109,66 @@ def ShowAligned(imgA, imgB, imgB_aligned, ptsA, ptsB_transformed, ptsB):
 
     plt.show()
 
+def ShowAlignedWithPoints(imgA, imgB, imgB_aligned,
+                          ptsA, ptsB_transformed, ptsB):
 
+    A = cv2.cvtColor(imgA, cv2.COLOR_BGR2RGB)
+    B = cv2.cvtColor(imgB, cv2.COLOR_BGR2RGB)
+    B_transformed = cv2.cvtColor(imgB_aligned, cv2.COLOR_BGR2RGB)
+
+    plt.figure(figsize=(10, 5))
+
+    plt.subplot(1, 3, 1)
+    plt.imshow(B)
+    plt.scatter(ptsB[:, 0], ptsB[:, 1], c="red", s=4)
+    plt.title("Image B")
+    plt.axis("off")
+
+    plt.subplot(1, 3, 2)
+    plt.imshow(A)
+    plt.scatter(ptsA[:, 0], ptsA[:, 1], c="red", s=4)
+    plt.title("Image A")
+    plt.axis("off")
+
+    plt.subplot(1, 3, 3)
+    plt.imshow(B_transformed)
+    plt.scatter(ptsB_transformed[:, 0], ptsB_transformed[:, 1],
+                c="red", s=4)
+    plt.title("Image B aligned")
+    plt.axis("off")
+
+    plt.show()
+
+
+def ShowAlignedWithoutPoints(imgA, imgB, imgB_aligned):
+
+    A = cv2.cvtColor(imgA, cv2.COLOR_BGR2RGB)
+    B = cv2.cvtColor(imgB, cv2.COLOR_BGR2RGB)
+    B_transformed = cv2.cvtColor(imgB_aligned, cv2.COLOR_BGR2RGB)
+
+    plt.figure(figsize=(10, 5))
+
+    plt.subplot(1, 3, 1)
+    plt.imshow(B)
+    plt.title("Image B")
+    plt.axis("off")
+
+    plt.subplot(1, 3, 2)
+    plt.imshow(A)
+    plt.title("Image A")
+    plt.axis("off")
+
+    plt.subplot(1, 3, 3)
+    plt.imshow(B_transformed)
+    plt.title("Image B aligned")
+    plt.axis("off")
+
+    plt.show()
 
 def main():
 
-    imageA = "face5"
-    imageB = "face2"
+    imageA = "face10"
+    imageB = "face7"
 
     imgA_path = Path(f"images/{imageA}.jpg")
     imgB_path = Path(f"images/{imageB}.jpg")
@@ -137,8 +191,8 @@ def main():
 
     ptsB_t = TransformPoints(ptsB, M)
 
-    ShowAligned(imgA, imgB, alignedB, ptsA, ptsB_t, ptsB)
-
+    ShowAlignedWithPoints(imgA, imgB, alignedB, ptsA, ptsB_t, ptsB)
+    ShowAlignedWithoutPoints(imgA, imgB, alignedB)
 
 if __name__ == "__main__":
     main()
